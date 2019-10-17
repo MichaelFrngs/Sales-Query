@@ -3,7 +3,7 @@ import time
 import os
 import pandas as pd
 from datetime import date
-from dateutil.relativedelta import relativedelta 
+from dateutil.relativedelta import relativedelta #Lets you use (years_ago = datetime.datetime.now() - relativedelta(years=5))
 
 Code_Directory = "C:/Users/mfrangos/Desktop/Daily Sales Query Program"
 
@@ -133,6 +133,14 @@ class Calendar(object):
 Current_Calendar = Calendar()
 #############################################################################################################
 
+#Turn a list of strings into a list of objects
+def eval_list(list_of_stuff):
+  object_output_list = []
+  for item in list_of_stuff:
+    object_output_list.append(eval(item))
+  
+  return object_output_list
+
 #Example
 Current_Calendar.CurrentDate
 
@@ -146,8 +154,9 @@ class create_store(object):
     self.TY_data = Data_source.loc[(Data_source["STORE"] == store_num) & (Data_source["GL YR"] == Current_Calendar.ReportYear    )]
     self.LY_data = Data_source.loc[(Data_source["STORE"] == store_num) & (Data_source["GL YR"] == Current_Calendar.ReportYear - 1)] 
 
+#date functions/methods for stores
   def TY_YTD_Data(self):
-    output = self.self.TY_data.loc[self.self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay]
+    output = self.TY_data.loc[self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay]
     return output.loc[output["STORE"] == self.store_num]
   def TY_QTD_Data(self):
     output = self.TY_data.loc[((self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) | (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) & (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
@@ -187,11 +196,11 @@ def rbind_store_data(temp_store_list,date_func):
 
 
 class store_list_object(object):
-  def __init__(self,list_of_stores):
-    self.list_of_stores = list_of_stores
-    self.data = rbind_store_data([store for store in list_of_stores],"NONE")
-    self.TY_data = data.loc[data["GL YR"] == Current_Calendar.ReportYear]
-    self.LY_data = data.loc[data["GL YR"] == Current_Calendar.ReportYear - 1]
+  def __init__(self,list_of_stores_input):
+    self.list_of_stores = list_of_stores_input
+    self.store_data = rbind_store_data([store for store in self.list_of_stores],"NONE")
+    self.TY_data = self.store_data.loc[self.store_data["GL YR"] == Current_Calendar.ReportYear] ####
+    self.LY_data = self.store_data.loc[self.store_data["GL YR"] == Current_Calendar.ReportYear - 1]
 
   def TY_YTD_by_(self,by,metric):
     output = self.TY_data.loc[self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay]
@@ -306,7 +315,7 @@ def take_input_store_selection(List_of_All_Stores):
         
         Select_stores_object_list = []
         for store in Selected_Stores:
-          exec(f"S{store} = create_store(store,data)")
+          #exec(f"{store} = create_store(store,data)")
           Select_stores_object_list.append(f"{store}")        
         
         return Select_stores_object_list
@@ -319,18 +328,12 @@ def take_input_store_selection(List_of_All_Stores):
       #print("\n")
       pass
   
-#Turn a list of strings into a list of objects
-def eval_list(list_of_stuff):
-  object_output_list = []
-  for item in list_of_stuff:
-    object_output_list.append(eval(item))
-  
-  return object_output_list
 
 
 
 
-######EXAMPLES TO TEST################
+
+#############EXAMPLES YOU CAN TEST
 #Create a list of stores
 #Short_stores_object_list = [S101,S102,S103] #Pick the stores you want to work with.
 
@@ -339,11 +342,12 @@ def eval_list(list_of_stuff):
 #    print(store)
 #    accumulation = accumulation.append(pd.DataFrame(data = eval(f'store.All_Data')), ignore_index=True)
 #    #accumulation = accumulation.append(pd.DataFrame(data = eval(f'store.TY_YTD_Data()')), ignore_index=True)
-
 #########################EXAMPLES
+#
 ##Query the group of stores
 #Group_of_stores_object.TY_QTD_by_(by="STORE", metric = "ADJ SALES")
 #Group_of_stores_object.LY_MTD_by_(by="DISTRICT", metric = "TRANS")
+#
 #
 ##Can be used to iterate through all possibilities
 ##### POSSIBLE PARAMETERS FOR METRICS: 'TRANS', 'NET SALES', 'UNITS', 'VIP', 'DIV9', 'ADJ SALES'
@@ -477,13 +481,13 @@ def take_input5():
   print("\n")
   print("Would you like the numbers changes in percentage?")
   print("NOTE: Input is case sensitive")
-  by_params = ["TRUE","FALSE"]
-  print(f"Options: {by_params}")
+  options = ["True","False"]
+  print(f"Options: {options}")
   valid_entry = False
 
   while valid_entry == False:
     input1 = input()
-    if input1 in by_params:
+    if input1 in options:
       return input1
       valid_entry = True
     elif input1 == "EXIT":
@@ -546,10 +550,10 @@ Continue_Querying = True
 
 while Continue_Querying == True:
   
-  #Create a list of stores
-  Store_Selection = take_input_store_selection(All_stores_object_list)
-  Short_stores_object_list = Store_Selection
-  Group_of_stores_object = store_list_object(eval_list(Short_stores_object_list)) #Group the list of stores into an object
+  #Create a list of stores. The user can select all stores, or a few.
+  Short_stores_object_list = take_input_store_selection(All_stores_object_list)
+  #Group the list of stores into an object
+  Group_of_stores_object = store_list_object(eval_list(Short_stores_object_list)) 
   #Ask the user what decisions he/she would like to make
   DataChoice = take_input1()
   TimeChoice = take_input2()
@@ -567,7 +571,7 @@ while Continue_Querying == True:
   Queried_Data = eval(f"Group_of_stores_object.{All_Choices}")
   
 
-  #Ask for input from the user
+  #Ask user if he/she would like to export the queried data
   Export_Input_Answer = Export_Input()
   #Logic to export or not
   if Export_Input_Answer == "yes":
@@ -583,10 +587,13 @@ while Continue_Querying == True:
   if Continue_Querying_Decision == "yes":
     pass
   else:
-    exit()
+    exit() #Closes the program
     
-#Only exits the program if user selects no
+
 
   
+
+
+
 
 
