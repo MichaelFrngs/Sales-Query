@@ -174,7 +174,10 @@ class create_store(object):
   
 def rbind_store_data(temp_store_list,date_func):
   accumulation = pd.DataFrame()
-  for store in temp_store_list:  
+  for store in temp_store_list:
+    if store is str:
+      store = eval(store)
+      print(type(store))
     if date_func == "NONE":
       print(store)
       accumulation = accumulation.append(pd.DataFrame(data = eval(f'store.All_Data')), ignore_index=True)
@@ -281,10 +284,55 @@ def compile_multi_store_data(All_stores_object_list, time_function):
 
 Closed_Stores = data.loc[(data["Status"] == "Closed") & (data["STORE"] != 100)]
 
-#Create a list of stores
-Short_stores_object_list = [S101,S102,S103] #Pick the stores you want to work with. 
-Group_of_stores_object = store_list_object(Short_stores_object_list) #Group the list of stores into an object
+def take_input_store_selection(List_of_All_Stores):
+  print("\n")
+  print("Query all stores? Or would you like to select the stores?")
+  print("NOTE: Input is case sensitive")
+  options = ["all", "select"]
+  print(f"Options: {options}")
+  valid_entry = False
 
+  while valid_entry == False:
+    input1 = input()
+    if input1 in options:
+      if input1 == "all":
+        return List_of_All_Stores
+      elif input1 == "select":
+        print("Options: ", List_of_All_Stores)
+        print("Type & separate each store with a comma:")
+        #Take input from user
+        Selected_Stores = input().replace(" ","").split(",")
+
+        
+        Select_stores_object_list = []
+        for store in Selected_Stores:
+          exec(f"S{store} = create_store(store,data)")
+          Select_stores_object_list.append(f"{store}")        
+        
+        return Select_stores_object_list
+      valid_entry = True
+    elif input1 == "EXIT":
+      print("Now exiting")
+      break      
+    else:
+      print("Invalid Entry. Please retype or type EXIT")
+      #print("\n")
+      pass
+  
+#Turn a list of strings into a list of objects
+def eval_list(list_of_stuff):
+  object_output_list = []
+  for item in list_of_stuff:
+    object_output_list.append(eval(item))
+  
+  return object_output_list
+
+
+
+
+######EXAMPLES TO TEST################
+#Create a list of stores
+#Short_stores_object_list = [S101,S102,S103] #Pick the stores you want to work with.
 
 #accumulation = pd.DataFrame()
 #for store in Short_stores_object_list: 
@@ -292,13 +340,10 @@ Group_of_stores_object = store_list_object(Short_stores_object_list) #Group the 
 #    accumulation = accumulation.append(pd.DataFrame(data = eval(f'store.All_Data')), ignore_index=True)
 #    #accumulation = accumulation.append(pd.DataFrame(data = eval(f'store.TY_YTD_Data()')), ignore_index=True)
 
-
 #########################EXAMPLES
-#
 ##Query the group of stores
 #Group_of_stores_object.TY_QTD_by_(by="STORE", metric = "ADJ SALES")
 #Group_of_stores_object.LY_MTD_by_(by="DISTRICT", metric = "TRANS")
-#
 #
 ##Can be used to iterate through all possibilities
 ##### POSSIBLE PARAMETERS FOR METRICS: 'TRANS', 'NET SALES', 'UNITS', 'VIP', 'DIV9', 'ADJ SALES'
@@ -343,6 +388,7 @@ def take_input1():
       valid_entry = True
     elif input1 == "EXIT":
       print("Now exiting")
+      exit()
       break      
     else:
       print("Invalid Entry. Please retype or type EXIT")
@@ -373,6 +419,7 @@ def take_input2():
       return "YTD"      
     elif input1 == "EXIT":
       print("Now exiting")
+      exit()
       break      
     else:
       print("Invalid Entry. Please retype or type EXIT")
@@ -395,6 +442,7 @@ def take_input3():
       valid_entry = True
     elif input1 == "EXIT":
       print("Now exiting")
+      exit()
       break      
     else:
       print("Invalid Entry. Please retype or type EXIT")
@@ -417,6 +465,7 @@ def take_input4():
       valid_entry = True
     elif input1 == "EXIT":
       print("Now exiting")
+      exit()
       break      
     else:
       print("Invalid Entry. Please retype or type EXIT")
@@ -426,7 +475,7 @@ def take_input4():
 
 def take_input5():
   print("\n")
-  print("Would you like the numbers in percentage change?")
+  print("Would you like the numbers changes in percentage?")
   print("NOTE: Input is case sensitive")
   by_params = ["TRUE","FALSE"]
   print(f"Options: {by_params}")
@@ -468,7 +517,7 @@ def Export_Input():
       #print("\n")
       pass
   return input1
-print("Would you like to export?")
+
 
 def Continue_Query_Input():
   print("\n")
@@ -491,11 +540,16 @@ def Continue_Query_Input():
       #print("\n")
       pass
   return input1
-print("Would you like to export?")
+
 
 Continue_Querying = True
 
 while Continue_Querying == True:
+  
+  #Create a list of stores
+  Store_Selection = take_input_store_selection(All_stores_object_list)
+  Short_stores_object_list = Store_Selection
+  Group_of_stores_object = store_list_object(eval_list(Short_stores_object_list)) #Group the list of stores into an object
   #Ask the user what decisions he/she would like to make
   DataChoice = take_input1()
   TimeChoice = take_input2()
@@ -505,7 +559,7 @@ while Continue_Querying == True:
   #If YoY is picked, we have to handle for some branching
   if DataChoice == "YoY_":
     YoY_PCT_Decision = take_input5()
-    All_Choices = DataChoice + TimeChoice + f"_by_(by='{CategoryChoice}', metric = '{MetricChoice}',return_percent = False)" 
+    All_Choices = DataChoice + TimeChoice + f"_by_(by='{CategoryChoice}', metric = '{MetricChoice}',return_percent = {YoY_PCT_Decision})" 
   else:
     All_Choices = DataChoice + TimeChoice + f"_by_(by='{CategoryChoice}', metric = '{MetricChoice}')"  #What to do about ,  return_percent = False)??
   
