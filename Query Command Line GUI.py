@@ -3,7 +3,7 @@ import time
 import os
 import pandas as pd
 from datetime import date
-from dateutil.relativedelta import relativedelta #Lets you use (years_ago = datetime.datetime.now() - relativedelta(years=5))
+from dateutil.relativedelta import relativedelta 
 
 Code_Directory = "C:/Users/mfrangos/Desktop/Daily Sales Query Program"
 
