@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from datetime import date
 from dateutil.relativedelta import relativedelta #Lets you use (years_ago = datetime.datetime.now() - relativedelta(years=5))
+import numpy as np
 
 Code_Directory = "C:/Users/mfrangos/Desktop/Daily Sales Query Program"
 
@@ -159,7 +160,10 @@ class create_store(object):
     output = self.TY_data.loc[self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay]
     return output.loc[output["STORE"] == self.store_num]
   def TY_QTD_Data(self):
-    output = self.TY_data.loc[((self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) | (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) & (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
+    output = self.TY_data.loc[((self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | 
+                               (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) |
+                               (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) &
+                              (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
     return output.loc[output["STORE"] == self.store_num]
   def TY_WTD_Data(self):
     output =  self.TY_data.loc[(self.TY_data["GL WK"] == (Current_Calendar.WK_Format(Current_Calendar.CurrentFiscalWeek))) & (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
@@ -172,7 +176,10 @@ class create_store(object):
     output = self.LY_data.loc[self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay]
     return output.loc[output["STORE"] == self.store_num]
   def LY_QTD_Data(self):  
-    output =  self.LY_data.loc[((self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) | (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) & (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
+    output =  self.LY_data.loc[((self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | 
+                                (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) | 
+                                (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) & 
+                               (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
     return output.loc[output["STORE"] == self.store_num]
   def LY_WTD_Data(self):
     output = self.LY_data.loc[(self.LY_data["GL WK"] == (Current_Calendar.WK_Format(Current_Calendar.CurrentFiscalWeek))) & (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
@@ -204,63 +211,121 @@ class store_list_object(object):
 
   def TY_YTD_by_(self,by,metric):
     output = self.TY_data.loc[self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay]
-    return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+    return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
   def TY_QTD_by_(self,by,metric):
     output = self.TY_data.loc[((self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) | (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) & (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
-    return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+    return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
   def TY_WTD_by_(self,by,metric):
     output =  self.TY_data.loc[(self.TY_data["GL WK"] == (Current_Calendar.WK_Format(Current_Calendar.CurrentFiscalWeek))) & (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
-    return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+    return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
   def TY_MTD_by_(self,by,metric):
     output =  self.TY_data.loc[(self.TY_data["GL PD"] == Current_Calendar.CurrentFiscalPeriod) & (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
-    return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+    return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
   
   def LY_YTD_by_(self,by,metric):
     output = self.LY_data.loc[self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay]
-    return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+    return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
   def LY_QTD_by_(self,by,metric):
-    output =  self.LY_data.loc[((self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) | (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) & (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
-    return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+    output =  self.LY_data.loc[((self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | 
+                                (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) | 
+                                (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) & 
+                               (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
+    return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
   def LY_WTD_by_(self,by,metric):
     output = self.LY_data.loc[(self.LY_data["GL WK"] == (Current_Calendar.WK_Format(Current_Calendar.CurrentFiscalWeek))) & (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
-    return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+    return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
   def LY_MTD_by_(self,by,metric):
     output = self.LY_data.loc[(self.LY_data["GL PD"] == Current_Calendar.CurrentFiscalPeriod) & (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
-    return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+    return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
   
   def YoY_YTD_by_(self,by,metric, return_percent):
     output = self.TY_data.loc[self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay]
     LY_output = self.LY_data.loc[self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay]
     if return_percent == True:
-      return (output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum').subtract(LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')))/LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+      return (output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum').subtract(LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')))/LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
     elif return_percent == False:
-      return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum').subtract(LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum'))
+      return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum').subtract(LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum'))
   def YoY_QTD_by_(self,by,metric, return_percent):
     output = self.TY_data.loc[((self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) | (self.TY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) & (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
     LY_output = self.LY_data.loc[((self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][0]) | (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][1]) | (self.LY_data["GL PD"] == Current_Calendar.Quarter_months_list[Current_Calendar.ReportQuarter-1][2])) & (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
     if return_percent == True:
-      return (output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum').subtract(LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')))/LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+      return (output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum').subtract(LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')))/LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
     elif return_percent == False:
-      return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum').subtract(LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum'))
+      return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum').subtract(LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum'))
   def YoY_WTD_by_(self,by,metric, return_percent):
     output =  self.TY_data.loc[(self.TY_data["GL WK"] == (Current_Calendar.WK_Format(Current_Calendar.CurrentFiscalWeek))) & (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
     LY_output = self.LY_data.loc[(self.LY_data["GL WK"] == (Current_Calendar.WK_Format(Current_Calendar.CurrentFiscalWeek))) & (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
     if return_percent == True:
-      return (output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum').subtract(LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')))/LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+      return (output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum').subtract(LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')))/LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
     elif return_percent == False:
-      return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum').subtract(LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum'))
+      return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum').subtract(LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum'))
   def YoY_MTD_by_(self,by,metric, return_percent):
     output = self.TY_data.loc[(self.TY_data["GL PD"] == Current_Calendar.CurrentFiscalPeriod) & (self.TY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
     LY_output = self.LY_data.loc[(self.LY_data["GL PD"] == Current_Calendar.CurrentFiscalPeriod) & (self.LY_data["GL DAY"] <= Current_Calendar.CurrentFiscalDay)]
     if return_percent == True:
-      return (output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum').subtract(LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')))/LY_output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum')
+      return (output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum').subtract(LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')))/LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum')
     elif return_percent == False:
-      return output.pivot_table(index = [f"{by}"],   values =f"{metric}", aggfunc='sum').subtract(LY_output.pivot_table(index = ["DISTRICT"],   values =f"{metric}", aggfunc='sum'))
+      return output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum').subtract(LY_output.pivot_table(index = list(map(str.strip,f"{by}".split(","))),   values = list(map(str.strip,f"{metric}".split(","))), aggfunc='sum'))
   
-
-
-
-  
+  def Retrieve_Data_by_date(self):
+    metric_params = ['TRANS', 'NET SALES', 'UNITS', 'VIP', 'DIV9', 'ADJ SALES']
+    by_params = ['STORE','DATE','STATE','COMP STATUS','GL DAY','GL WK', 'GL PD','REGION','DISTRICT','SS DATE','AGE OF STORE', "Status"]
+    
+    print("Please enter start date (Format: 20190130):")
+    Start_Date = int(input())
+    print("Please enter end date (Format: 20191018):")
+    End_Date = int(input())
+    
+    query_result = self.store_data.loc[(self.store_data["DATE"] >= Start_Date) & (self.store_data["DATE"] <= End_Date)]
+    print(query_result)
+    
+    Valid_Selection = False
+    while Valid_Selection == False:
+      print("Pivot the results? (yes/no)")
+      User_Pivot_Selection = input() #Yes or no?
+      
+      if User_Pivot_Selection == "yes":
+        print("Select the columns. Separate multiple choices with a comma (,).")
+        print(f"Options: {by_params}")
+        columns_choice = list(map(str.strip,input().split(",")))
+          
+        print("Select the rows. Separate multiple choices with a comma (,).")
+        print(f"Options: {by_params}")
+        index_choice = list(map(str.strip,input().split(",")))
+        
+        print("Select the metric. Separate multiple choices with a comma (,).")
+        print(f"Options: {metric_params}")            
+        values_choice = list(map(str.strip,input().split(",")))
+        
+        print("Select the function. Separate multiple choices with a comma (,).")
+        print(f"Options: sum, std, mean, max, min, median, count")            
+        agg_func_choice = list(map(str.strip,input().split(",")))
+        
+        
+        query_result = query_result.pivot_table(index = index_choice, columns = columns_choice, values = values_choice, aggfunc = agg_func_choice)
+        print(query_result)
+        
+      print("Export Results?")
+      print("Options: yes/no")
+      Valid_Export_Decision = False
+      while Valid_Export_Decision == False:
+        Export_Decision = input()
+        if Export_Decision == "yes":
+          print("Please enter file name")
+          file_name = input()
+          os.chdir(Code_Directory)
+          query_result.to_excel(f"{file_name}.xlsx")
+          print("Now exporting. Please wait . . .")
+            
+        return query_result
+      
+      if User_Pivot_Selection == "no":
+        return query_result
+      else:
+        print("Invalid Selection. Please re-enter:")
+      
+    
+    
 #Create store list
 store_list = []
 for store in data["STORE"]:
@@ -333,15 +398,18 @@ def take_input_store_selection(List_of_All_Stores):
 
 
 
-#############EXAMPLES YOU CAN TEST
+#EXAMPLES TO TEST
 #Create a list of stores
 #Short_stores_object_list = [S101,S102,S103] #Pick the stores you want to work with.
+#Group_of_stores_object = store_list_object(Short_stores_object_list)
 
 #accumulation = pd.DataFrame()
 #for store in Short_stores_object_list: 
 #    print(store)
 #    accumulation = accumulation.append(pd.DataFrame(data = eval(f'store.All_Data')), ignore_index=True)
 #    #accumulation = accumulation.append(pd.DataFrame(data = eval(f'store.TY_YTD_Data()')), ignore_index=True)
+
+
 #########################EXAMPLES
 #
 ##Query the group of stores
@@ -374,7 +442,7 @@ def take_input_store_selection(List_of_All_Stores):
 
 def take_input1():
   print("\n")
-  print("What kind of Data would you like?")
+  print("What kind of data would you like?")
   print("NOTE: Input is case sensitive")
   print("Options: TY, LY, YoY")
   valid_entry = False
@@ -433,12 +501,12 @@ def take_input2():
 
 def take_input3():
   print("\n")
-  print("What period of time would you like?")
+  print("What metric would you like?")
   print("NOTE: Input is case sensitive")
   metric_params = ['TRANS', 'NET SALES', 'UNITS', 'VIP', 'DIV9', 'ADJ SALES']
   print(f"Options: {metric_params}")
   valid_entry = False
-
+  
   while valid_entry == False:
     input1 = input()
     if input1 in metric_params:
@@ -461,20 +529,31 @@ def take_input4():
   by_params = ['STORE','DATE','STATE','COMP STATUS','GL DAY','GL WK', 'GL PD','REGION','DISTRICT','SS DATE','AGE OF STORE', "Status"]
   print(f"Options: Categorize by... {by_params}")
   valid_entry = False
-
+    
+  
   while valid_entry == False:
+    #Ask for input
     input1 = input()
-    if input1 in by_params:
-      return input1
-      valid_entry = True
-    elif input1 == "EXIT":
-      print("Now exiting")
-      exit()
-      break      
-    else:
-      print("Invalid Entry. Please retype or type EXIT")
-      #print("\n")
-      pass
+    #Check list for input accuracy
+    Check_Entry_List =  list(map(str.strip,input1.split(",")))
+   
+    #Iterate through the list
+    for entry in Check_Entry_List:
+      if entry in by_params:
+        pass
+        
+#      if input1 in by_params:
+#        return input1
+        valid_entry = True 
+      elif input1 == "EXIT":
+        print("Now exiting")
+        exit()
+        break      
+      else:
+        print("Invalid Entry. Please retype or type EXIT")
+        print("\n")
+        valid_entry = False
+       
   return input1
 
 def take_input5():
@@ -545,16 +624,72 @@ def Continue_Query_Input():
       pass
   return input1
 
+def Reselect_Stores_Input():
+  print("\n")
+  print("Would you like to reselect stores?")
+  print("NOTE: Input is case sensitive")
+  options = ["yes","no"]
+  print(f"Options: {options}")
+  valid_entry = False
 
-Continue_Querying = True
+  while valid_entry == False:
+    input1 = input()
+    if input1 in options:
+      return input1
+      valid_entry = True
+    elif input1 == "EXIT":
+      print("Now exiting")
+      break      
+    else:
+      print("Invalid Entry. Please retype or type EXIT")
+      #print("\n")
+      pass
+  return input1
 
-while Continue_Querying == True:
-  
-  #Create a list of stores. The user can select all stores, or a few.
+
+def select_stores(All_stores_object_list):
+  #Create a list of stores. The user can select all stores, or a few stores.
   Short_stores_object_list = take_input_store_selection(All_stores_object_list)
   #Group the list of stores into an object
   Group_of_stores_object = store_list_object(eval_list(Short_stores_object_list)) 
-  #Ask the user what decisions he/she would like to make
+  
+  return Group_of_stores_object
+
+
+
+
+Continue_Querying = True
+first_pass_through = True
+
+#Begin the store selection process
+Group_of_stores_object = select_stores(All_stores_object_list)
+
+
+print("Would you like to select dates (yes) or use period reports (no)?")
+print("Options: yes/no")
+User_Date_Selection = input()
+  
+Continue_Select_Dates = True
+while Continue_Select_Dates == True:
+  if User_Date_Selection == "yes":
+    Group_of_stores_object.Retrieve_Data_by_date()
+    Continue_Select_Dates = False
+  Invalid_Entry2 = True
+  while Invalid_Entry2 == True:
+    print("Continue query by selecting dates (yes)? Or use period reports (no)?")
+    print("Options: yes/no")
+    User_Continue_Selection = input()
+    if User_Continue_Selection == "yes":
+      Continue_Select_Dates = True
+      Invalid_Entry2 = False
+    elif User_Continue_Selection == "no":
+      Continue_Select_Dates = False
+      Invalid_Entry2 = False
+    else:
+      print("Invalid Entry. Restarting")
+
+while Continue_Querying == True:
+   #Ask the user what decisions he/she would like to make
   DataChoice = take_input1()
   TimeChoice = take_input2()
   MetricChoice = take_input3()
@@ -575,7 +710,7 @@ while Continue_Querying == True:
   Export_Input_Answer = Export_Input()
   #Logic to export or not
   if Export_Input_Answer == "yes":
-    Queried_Data.to_excel(f"{Code_Directory}/{All_Choices}.xlsx")
+    Queried_Data.to_excel(f"{Code_Directory}/{All_Choices}.xlsx", merge_cells = False)
   else:
     pass
   
@@ -585,15 +720,16 @@ while Continue_Querying == True:
   #Ask user if he/she wants to continue
   Continue_Querying_Decision = Continue_Query_Input()
   if Continue_Querying_Decision == "yes":
-    pass
-  else:
-    exit() #Closes the program
+    first_pass_through = False
     
-
-
-  
-
-
-
+    #Ask user if they would like to reselect the stores
+    Reselect_Stores_Response = Reselect_Stores_Input()  
+    if Reselect_Stores_Response == "yes":  
+      Group_of_stores_object = select_stores(All_stores_object_list)
+    else:
+      pass
+  else:
+    exit()
+    
 
 
